@@ -36,7 +36,6 @@ object MockData {
         )
     )
 
-    val defaultBugDescription = "Payment failed after I switched from Wi-Fi to mobile data."
 
     val sampleAnalysis = AIAnalysis(
         issueName = "Payment Failure",

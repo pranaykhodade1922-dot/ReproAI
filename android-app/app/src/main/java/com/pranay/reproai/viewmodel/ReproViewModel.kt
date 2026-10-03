@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.room.withTransaction
 import com.pranay.reproai.ai.AnalysisInput
+import com.pranay.reproai.ai.CaptureDescriptionDraft
 import com.pranay.reproai.ai.AnalysisResult
 import com.pranay.reproai.ai.BugAnalyzer
 import com.pranay.reproai.ai.RuleBasedFallbackProvider
@@ -44,7 +45,7 @@ data class ReproUiState(
     val orientationState: String = "Portrait",
     val memoryState: String = "Normal",
     // Describe Bug
-    val bugDescriptionText: String = MockData.defaultBugDescription,
+    val captureDescription: CaptureDescriptionDraft = CaptureDescriptionDraft(),
     val isAnalyzing: Boolean = false,
     val isListeningVoice: Boolean = false,
     // AI Analysis
@@ -61,7 +62,9 @@ data class ReproUiState(
     val testResult: TestResultData = MockData.bugReproducedResult,
     val isFixVerifiedMode: Boolean = false,
     val exportedJson: String? = null
-)
+) {
+    val bugDescriptionText: String get() = captureDescription.text
+}
 
 class ReproViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -77,7 +80,8 @@ class ReproViewModel(application: Application) : AndroidViewModel(application) {
             val gson = com.pranay.reproai.data.remote.RunnerApiClient.gson
             val analysis = db.reportDao().analysis(session.id)?.let { gson.fromJson(it.analysisJson, AnalysisResult::class.java) }
                 ?: saved?.let { gson.fromJson(it.analysisJson, AnalysisResult::class.java) }
-            _uiState.update { it.copy(currentSession = session, analysisResult = analysis, timelineEvents = session.events) }
+            _uiState.update { it.copy(currentSession = session, analysisResult = analysis, timelineEvents = session.events,
+                captureDescription = CaptureDescriptionDraft.restore(session.id, session.userDescription)) }
             if (saved != null) runnerRepository.restore(
                 gson.fromJson(saved.resultJson, com.pranay.reproai.data.remote.dto.ExecutionResult::class.java).validated(),
                 com.pranay.reproai.data.remote.dto.ExecutionPurpose.valueOf(saved.purpose))
@@ -164,6 +168,7 @@ class ReproViewModel(application: Application) : AndroidViewModel(application) {
                 sessionTimerSeconds = 0,
                 eventsCapturedCount = 1,
                 exportedJson = null,
+                captureDescription = CaptureDescriptionDraft(sessionId = session.id),
                 analysisResult = null
             )
         }
@@ -178,6 +183,10 @@ class ReproViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun captureBug() {
+        val session = sessionManager.currentSession.value ?: return
+        if (!session.isActive || _uiState.value.currentSession?.id != session.id) return
+        _uiState.update { state -> state.copy(captureDescription =
+            state.captureDescription.initialize(session.id, sessionManager.events.value)) }
         ReproTracker.trackAction("CAPTURE BUG")
         sessionManager.captureBug(_uiState.value.bugDescriptionText)
     }
@@ -205,7 +214,7 @@ class ReproViewModel(application: Application) : AndroidViewModel(application) {
 
     fun updateBugDescription(text: String) {
         _uiState.update { state ->
-            state.copy(bugDescriptionText = text)
+            state.copy(captureDescription = state.captureDescription.edit(text))
         }
     }
 
@@ -213,12 +222,7 @@ class ReproViewModel(application: Application) : AndroidViewModel(application) {
         _uiState.update { state ->
             val nextVoice = !state.isListeningVoice
             state.copy(
-                isListeningVoice = nextVoice,
-                bugDescriptionText = if (nextVoice) {
-                    "Payment failed right when Wi-Fi disconnected during payment authorization."
-                } else {
-                    state.bugDescriptionText
-                }
+                isListeningVoice = nextVoice
             )
         }
     }
@@ -337,7 +341,6 @@ class ReproViewModel(application: Application) : AndroidViewModel(application) {
     fun resetToHome() {
         _uiState.update { state ->
             state.copy(
-                bugDescriptionText = MockData.defaultBugDescription,
                 testResult = MockData.bugReproducedResult,
                 isFixVerifiedMode = false
             )

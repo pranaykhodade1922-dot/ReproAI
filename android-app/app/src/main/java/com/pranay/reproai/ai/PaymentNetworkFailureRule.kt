@@ -5,7 +5,7 @@ import java.util.UUID
 
 class PaymentNetworkFailureRule : IncidentAnalysisRule {
 
-    override fun detect(input: AnalysisInput): Boolean = input.events.any { it.title == "TOKEN_EXPIRED" } && input.events.any { it.title.contains("401") } && input.events.any { it.title == "PAYMENT_FAILED" }
+    override fun detect(input: AnalysisInput): Boolean = CapturedFailureEvidence.paymentFailure(input.events)
     override suspend fun analyze(input: AnalysisInput): AnalysisResult {
         val events = input.events
 

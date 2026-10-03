@@ -29,7 +29,7 @@ fun DescribeBugScreen(descriptionText: String, isAnalyzing: Boolean, isListening
             MetadataRow("Last signal",(events.lastOrNull { it.type.name in listOf("ERROR","API_RESPONSE") } ?: events.lastOrNull())?.title ?: "No recorded events",true)
             SectionLabel("Describe what happened")
             OutlinedTextField(descriptionText,onDescriptionChanged,modifier=Modifier.fillMaxWidth(),minLines=5,
-                placeholder={Text("Payment failed after switching networks...")},
+                placeholder={Text(com.pranay.reproai.ai.CaptureDescription.placeholder)},
                 trailingIcon={IconButton(onClick=onVoiceToggle,enabled=!isAnalyzing) {
                     Icon(if(isListeningVoice) Icons.Default.MicOff else Icons.Default.Mic,
                         if(isListeningVoice) "Stop voice recording" else "Dictate issue description")
