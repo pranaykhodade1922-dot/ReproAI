@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface ScreenshotItem {
   id: string;
@@ -89,6 +89,26 @@ const secondaryScreenshots: ScreenshotItem[] = [
 
 export const Screenshots: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState<ScreenshotItem | null>(null);
+
+  useEffect(() => {
+    if (selectedImage) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          setSelectedImage(null);
+        }
+      };
+
+      window.addEventListener('keydown', handleKeyDown);
+
+      return () => {
+        document.body.style.overflow = originalOverflow;
+        window.removeEventListener('keydown', handleKeyDown);
+      };
+    }
+  }, [selectedImage]);
 
   return (
     <section id="screenshots" className="py-20 border-t border-[#1a2130] bg-[#080b10]">
@@ -198,42 +218,56 @@ export const Screenshots: React.FC = () => {
         {/* Modal / Lightbox for Full Inspection */}
         {selectedImage && (
           <div
-            className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6"
+            className="fixed inset-0 z-50 overflow-y-auto bg-black/85 backdrop-blur-md p-4 sm:p-6 md:p-8"
             onClick={() => setSelectedImage(null)}
+            role="dialog"
+            aria-modal="true"
+            aria-label={selectedImage.title}
           >
-            <div
-              className="relative max-w-lg w-full max-h-[92vh] bg-[#0c1017] border border-[#26334a] rounded-2xl p-4 flex flex-col items-center shadow-2xl overflow-y-auto"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="w-full flex items-center justify-between pb-3 mb-3 border-b border-[#1e273a]">
-                <div>
-                  <span className="text-xs font-mono text-sky-400 uppercase">{selectedImage.tag}</span>
-                  <h3 className="text-base font-semibold text-white">{selectedImage.title}</h3>
+            <div className="min-h-full flex items-start md:items-center justify-center py-4 sm:py-6">
+              <div
+                className="relative w-full max-w-[480px] bg-[#0c1017] border border-[#26334a] rounded-2xl shadow-2xl overflow-hidden flex flex-col my-auto"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Sticky Header with Close Button */}
+                <div className="sticky top-0 z-10 w-full flex items-center justify-between px-5 py-3.5 bg-[#0c1017]/95 backdrop-blur-md border-b border-[#1e273a]">
+                  <div>
+                    <span className="text-[11px] font-mono text-sky-400 uppercase tracking-wider font-semibold">
+                      {selectedImage.tag}
+                    </span>
+                    <h3 className="text-base font-semibold text-white tracking-tight">
+                      {selectedImage.title}
+                    </h3>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedImage(null)}
+                    className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+                    aria-label="Close screenshot"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setSelectedImage(null)}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors focus:outline-none"
-                  aria-label="Close modal"
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                  </svg>
-                </button>
-              </div>
 
-              <div className="rounded-xl overflow-hidden border-2 border-slate-700 bg-black max-w-[320px] shadow-2xl my-2">
-                <img
-                  src={selectedImage.src}
-                  alt={selectedImage.title}
-                  className="w-full h-auto block"
-                />
-              </div>
+                {/* Complete Screenshot: unconstrained height, natural aspect ratio, no cropping */}
+                <div className="p-4 sm:p-6 bg-[#06080d] flex items-center justify-center">
+                  <div className="rounded-xl overflow-hidden border border-[#232f46] bg-black shadow-lg w-full max-w-[420px]">
+                    <img
+                      src={selectedImage.src}
+                      alt={`${selectedImage.title} screen capture from physical Android device`}
+                      className="block w-auto max-w-full h-auto mx-auto object-contain"
+                    />
+                  </div>
+                </div>
 
-              <p className="mt-3 text-xs sm:text-sm text-slate-300 text-center leading-relaxed">
-                {selectedImage.description}
-              </p>
+                {/* Description Caption */}
+                <div className="px-5 py-4 bg-[#0a0e16] border-t border-[#182030] text-xs sm:text-sm text-slate-300 leading-relaxed text-center">
+                  {selectedImage.description}
+                </div>
+              </div>
             </div>
           </div>
         )}

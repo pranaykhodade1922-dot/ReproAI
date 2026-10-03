@@ -36,3 +36,4 @@ backend/artifacts/
 backend/docs/*-result.json
 backend/docs/*-result.xml
 backend/docs/phone-*.xml
+release-assets/

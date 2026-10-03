@@ -28,7 +28,7 @@ export const FinalCta: React.FC = () => {
         <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
           {/* Primary: Download Demo */}
           <a
-            href={links.latestRelease}
+            href={links.release}
             target="_blank"
             rel="noreferrer"
             className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl text-sm font-semibold text-slate-950 bg-gradient-to-r from-sky-400 to-teal-300 hover:from-sky-300 hover:to-teal-200 transition-all shadow-lg shadow-sky-500/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"

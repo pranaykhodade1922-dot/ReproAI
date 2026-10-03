@@ -2,11 +2,26 @@ import React from 'react';
 import { links } from '../config';
 
 export const TryReproAI: React.FC = () => {
+  const packageItems = [
+    {
+      name: 'ReproAI',
+      file: 'reproai-demo-v1.0.apk',
+      role: 'Main Android debugging application',
+      desc: 'Captures domain & lifecycle events, displays scenario diagnosis, and renders execution results.',
+    },
+    {
+      name: 'DemoShop',
+      file: 'demoshop-demo-v1.0.apk',
+      role: 'Instrumented demonstration target app',
+      desc: 'Sample mobile commerce application featuring controlled failure hooks for end-to-end validation.',
+    },
+  ];
+
   const requirements = [
-    { title: 'ReproAI Android app', desc: 'Captures events & displays test results' },
-    { title: 'DemoShop instrumented target app', desc: 'Sample e-commerce app with reproducible defect modes' },
-    { title: 'Laptop running Repro Runner', desc: 'Python 3.12 + FastAPI daemon orchestrating ADB' },
-    { title: 'ADB-authorized Android device', desc: 'Physical phone connected via USB or wireless debugging' },
+    { title: 'ReproAI Android app', desc: 'Installed on device' },
+    { title: 'DemoShop target app', desc: 'Installed on device' },
+    { title: 'Repro Runner running on a laptop', desc: 'Python 3.12 + FastAPI daemon' },
+    { title: 'ADB-authorized Android device', desc: 'USB or wireless debugging' },
   ];
 
   return (
@@ -28,28 +43,33 @@ export const TryReproAI: React.FC = () => {
 
         {/* Primary Download Card */}
         <div className="rounded-2xl border border-[#1e273a] bg-[#0c1017] p-6 sm:p-10 shadow-2xl relative overflow-hidden">
-          {/* Subtle accent gradient behind card */}
+          {/* Subtle accent gradient */}
           <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-bl from-sky-500/10 via-emerald-500/5 to-transparent blur-3xl pointer-events-none -z-10" />
 
-          <div className="max-w-3xl">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono bg-sky-950/60 border border-sky-800/50 text-sky-300 font-medium mb-4">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Hackathon Demo Build</span>
+          <div>
+            {/* Badges */}
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono bg-sky-950/60 border border-sky-800/50 text-sky-300 font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Hackathon Demo Build</span>
+              </div>
+              <span className="text-[11px] font-mono text-slate-400 px-2.5 py-0.5 rounded bg-[#101622] border border-[#1e273a]">
+                Demo release: v1.0.0-demo
+              </span>
             </div>
 
             {/* Title & Description */}
             <h3 className="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-3">
               Run ReproAI on Android
             </h3>
-            <p className="text-sm sm:text-base text-slate-300 leading-relaxed mb-8">
-              The complete prototype uses two Android applications plus the laptop-side Repro Runner.
+            <p className="text-sm sm:text-base text-slate-300 leading-relaxed max-w-3xl mb-8">
+              The complete prototype uses two Android applications plus the laptop-side Repro Runner. Both APKs are available directly from the official GitHub Release.
             </p>
 
             {/* Actions */}
             <div className="flex flex-wrap items-center gap-4 mb-10">
               <a
-                href={links.latestRelease}
+                href={links.release}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl text-sm font-semibold text-slate-950 bg-gradient-to-r from-sky-400 to-teal-300 hover:from-sky-300 hover:to-teal-200 transition-all shadow-md shadow-sky-500/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
@@ -87,43 +107,66 @@ export const TryReproAI: React.FC = () => {
                 <span>View Source</span>
               </a>
             </div>
-          </div>
 
-          {/* Requirements Section */}
-          <div className="pt-8 border-t border-[#182030]">
-            <div className="text-xs font-mono uppercase tracking-wider text-slate-300 font-semibold mb-4">
-              Full demo requires:
-            </div>
+            {/* Package Contents Breakdown */}
+            <div className="pt-8 border-t border-[#182030] mb-8">
+              <div className="text-xs font-mono uppercase tracking-wider text-slate-300 font-semibold mb-4">
+                The GitHub Release contains:
+              </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-              {requirements.map((req) => (
-                <div key={req.title} className="p-3.5 rounded-xl bg-[#090d14] border border-[#1b2538]">
-                  <div className="flex items-center gap-2 text-slate-200 font-medium text-xs">
-                    <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
-                    <span>{req.title}</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {packageItems.map((pkg) => (
+                  <div key={pkg.name} className="p-4 rounded-xl bg-[#090d14] border border-[#1b2538]">
+                    <div className="flex items-center justify-between gap-2 mb-1.5">
+                      <span className="text-sm font-bold text-white">{pkg.name}</span>
+                      <code className="text-[11px] font-mono text-sky-400 bg-sky-950/40 px-2 py-0.5 rounded border border-sky-800/40">
+                        {pkg.file}
+                      </code>
+                    </div>
+                    <div className="text-xs text-slate-300 font-medium mb-1">{pkg.role}</div>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">{pkg.desc}</p>
                   </div>
-                  <p className="mt-1 text-[11px] text-slate-400 leading-relaxed">
-                    {req.desc}
-                  </p>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
 
-            <p className="text-xs text-slate-400 font-mono">
-              The complete reproduction and fix-verification workflow requires both Android apps and the laptop-side runner.
-            </p>
-          </div>
+            {/* Requirements Section */}
+            <div className="pt-6 border-t border-[#182030]">
+              <div className="text-xs font-mono uppercase tracking-wider text-slate-300 font-semibold mb-4">
+                Full demo requires:
+              </div>
 
-          {/* Distribution & Honesty Footnotes */}
-          <div className="mt-8 pt-6 border-t border-[#182030] flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs text-slate-400">
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
-              <span>APK files are distributed through GitHub Releases and are intentionally excluded from normal source history.</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 mb-4">
+                {requirements.map((req) => (
+                  <div key={req.title} className="p-3 rounded-lg bg-[#090d14] border border-[#182234]">
+                    <div className="flex items-center gap-2 text-slate-200 font-medium text-xs">
+                      <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
+                      <span>{req.title}</span>
+                    </div>
+                    <p className="mt-1 text-[11px] text-slate-400">
+                      {req.desc}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <p className="text-xs text-slate-400 font-mono">
+                Both APKs are available from the GitHub Release. The complete reproduction and fix-verification workflow requires both Android applications and the laptop-side runner.
+              </p>
             </div>
 
-            <div className="flex items-center gap-2 text-slate-400 font-mono text-[11px]">
-              <span>Validated end-to-end on a physical Android device. Actual iQOO hardware validation remains pending.</span>
+            {/* Distribution & Honesty Footnotes */}
+            <div className="mt-8 pt-6 border-t border-[#182030] flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs text-slate-400">
+              <div className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
+                <span>APK binaries are distributed through GitHub Releases and are excluded from normal source history.</span>
+              </div>
+
+              <div className="flex items-center gap-2 text-slate-400 font-mono text-[11px]">
+                <span>Validated end-to-end on a physical Android device. Actual iQOO hardware validation remains pending.</span>
+              </div>
             </div>
+
           </div>
 
         </div>
