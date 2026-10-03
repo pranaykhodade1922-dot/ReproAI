@@ -1,0 +1,46 @@
+{
+  "id": "scenario-payment-network",
+  "name": "Payment network transition failure",
+  "description": "Reproduce payment failure during connectivity transition",
+  "preconditions": [
+    {
+      "type": "NETWORK",
+      "value": "WIFI"
+    }
+  ],
+  "steps": [
+    {
+      "action": "OPEN_SCREEN",
+      "target": "Checkout"
+    },
+    {
+      "action": "CHANGE_NETWORK",
+      "value": "CELLULAR"
+    },
+    {
+      "action": "TAP",
+      "target": "PAY"
+    },
+    {
+      "action": "WAIT",
+      "value": "2500"
+    }
+  ],
+  "assertions": [
+    {
+      "type": "ASSERT_EVENT",
+      "target": "TOKEN_EXPIRED",
+      "expected": "True"
+    },
+    {
+      "type": "ASSERT_API_STATUS",
+      "target": "/payment",
+      "expected": "401"
+    },
+    {
+      "type": "ASSERT_EVENT",
+      "target": "PAYMENT_FAILED",
+      "expected": "True"
+    }
+  ]
+}

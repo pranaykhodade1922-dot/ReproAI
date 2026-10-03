@@ -1,0 +1,16 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <provider android:name=".DemoAutomationProvider" android:authorities="com.pranay.demoshop.automation" android:exported="true" />
+        <activity android:name=".DemoDeepLinkActivity" android:exported="true"
+            android:taskAffinity="" android:noHistory="true" android:excludeFromRecents="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="reproai-demo" android:host="product" />
+                <data android:scheme="reproai-demo" android:host="cart" />
+                <data android:scheme="reproai-demo" android:host="checkout" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
