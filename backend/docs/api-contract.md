@@ -8,6 +8,25 @@ TestStep is the existing TestActionItem model; no duplicate request model is int
 
 ## TestScenario
 
+`assertions` is the original reproduction profile. `verification_assertions` is a separate
+array of the same typed `TestAssertion` objects. `execution_purpose` is `REPRODUCE`
+(the default for legacy requests) or `VERIFY_FIX`. Verification selects only the healthy
+profile; an empty profile or an absence-only expectation is rejected with HTTP 422.
+The scenario ID, preconditions and steps remain identical across the two executions.
+
+For payment verification, require `ASSERT_EVENT TOKEN_REFRESHED True`,
+`ASSERT_API_STATUS /payment 200`, and `ASSERT_EVENT PAYMENT_SUCCESS True`.
+For checkout rotation, require `CHECKOUT_STATE_RESTORED`, `CHECKOUT_VALID`, and
+`PAYMENT_AVAILABLE`, together with measured orientation change and Activity recreation.
+An assertion in `steps`, such as valid checkout before rotation, remains unchanged.
+
+Every execution snapshot echoes `execution_purpose`. A terminal ADB result includes
+`product_outcome`: `BUG_REPRODUCED`, `FIX_VERIFIED`, `VERIFICATION_FAILED`, or
+`UNCONFIRMED`. A confirmed outcome requires passed actions and assertions plus the
+execution-scoped DemoShop snapshot. MOCK never confirms a product outcome. The app
+also validates measured evidence and requires a passed healthy profile for verification.
+Reports retain distinct reproduction and verification execution IDs and their evidence.
+
 Exact example:
 ```json
 {
@@ -70,6 +89,14 @@ JSON schema:
 ```json
 {
   "$defs": {
+    "ExecutionPurpose": {
+      "enum": [
+        "REPRODUCE",
+        "VERIFY_FIX"
+      ],
+      "title": "ExecutionPurpose",
+      "type": "string"
+    },
     "TestAction": {
       "enum": [
         "OPEN_SCREEN",
@@ -219,6 +246,17 @@ JSON schema:
       },
       "title": "Assertions",
       "type": "array"
+    },
+    "verification_assertions": {
+      "items": {
+        "$ref": "#/$defs/TestAssertion"
+      },
+      "title": "Verification Assertions",
+      "type": "array"
+    },
+    "execution_purpose": {
+      "$ref": "#/$defs/ExecutionPurpose",
+      "default": "REPRODUCE"
     }
   },
   "required": [
@@ -514,6 +552,14 @@ JSON schema:
 ```json
 {
   "$defs": {
+    "ExecutionPurpose": {
+      "enum": [
+        "REPRODUCE",
+        "VERIFY_FIX"
+      ],
+      "title": "ExecutionPurpose",
+      "type": "string"
+    },
     "ExecutionStatus": {
       "enum": [
         "PENDING",
@@ -628,6 +674,21 @@ JSON schema:
       "title": "Execution Mode",
       "type": "string"
     },
+    "execution_purpose": {
+      "$ref": "#/$defs/ExecutionPurpose",
+      "default": "REPRODUCE"
+    },
+    "product_outcome": {
+      "default": "UNCONFIRMED",
+      "enum": [
+        "UNCONFIRMED",
+        "BUG_REPRODUCED",
+        "FIX_VERIFIED",
+        "VERIFICATION_FAILED"
+      ],
+      "title": "Product Outcome",
+      "type": "string"
+    },
     "started_at": {
       "title": "Started At",
       "type": "string"
@@ -676,7 +737,8 @@ JSON schema:
         {
           "enum": [
             "REAL_NETWORK",
-            "DEMOSHOP_DEMO_HOOK"
+            "DEMOSHOP_DEMO_HOOK",
+            "ANDROID_CONFIGURATION"
           ],
           "type": "string"
         },
@@ -1011,6 +1073,6 @@ GET missing ID:
 
 MOCK actions/assertions are simulated and never prove reproduction. ADB DemoShop assertions use execution-scoped debug state emitted by the on-device fake payment service. The result adds network_strategy, setup_evidence and observed_state. See [DemoShop automation](demoshop-automation.md) for exact physical-device evidence.
 
-PASSED means the submitted assertions succeeded. Android REPRODUCE requires the full measured TOKEN_EXPIRED + HTTP401 + PAYMENT_FAILED signature. VERIFY_FIX reruns the same failure scenario, whose assertions correctly FAIL after the fix; the UI requires TOKEN_REFRESHED + HTTP200 + PAYMENT_SUCCESS with no failure events. Purpose remains Android context, never a request field.
+PASSED means the selected assertion profile succeeded. REPRODUCE requires the measured TOKEN_EXPIRED + HTTP401 + PAYMENT_FAILED signature. VERIFY_FIX reruns the original scenario ID, setup and actions with verification_assertions requiring TOKEN_REFRESHED + HTTP200 + PAYMENT_SUCCESS. Both successful runs are PASSED. The runner echoes execution_purpose and supplies the scoped product_outcome; the UI never upgrades a FAILED run to FIX VERIFIED.
 
 Known DemoShop taps invoke the shared UI controllers through an allow-listed debug bridge, without coordinate taps. Unknown targets and unsupported assertion kinds return UNSUPPORTED. REAL_NETWORK is explicitly unsupported; DETERMINISTIC_DEMO reports DEMOSHOP_DEMO_HOOK and never toggles radios. Preconditions remain manual.

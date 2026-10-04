@@ -59,7 +59,7 @@ text += '''
 
 MOCK actions/assertions are simulated and never prove reproduction. ADB DemoShop assertions use execution-scoped debug state emitted by the on-device fake payment service. The result adds network_strategy, setup_evidence and observed_state. See [DemoShop automation](demoshop-automation.md) for exact physical-device evidence.
 
-PASSED means the submitted assertions succeeded. Android REPRODUCE requires the full measured TOKEN_EXPIRED + HTTP401 + PAYMENT_FAILED signature. VERIFY_FIX reruns the same failure scenario, whose assertions correctly FAIL after the fix; the UI requires TOKEN_REFRESHED + HTTP200 + PAYMENT_SUCCESS with no failure events. Purpose remains Android context, never a request field.
+PASSED means the selected assertion profile succeeded. REPRODUCE requires the measured TOKEN_EXPIRED + HTTP401 + PAYMENT_FAILED signature. VERIFY_FIX reruns the original scenario ID, setup and actions with verification_assertions requiring TOKEN_REFRESHED + HTTP200 + PAYMENT_SUCCESS. Both successful runs are PASSED. The runner echoes execution_purpose and supplies the scoped product_outcome; the UI never upgrades a FAILED run to FIX VERIFIED. Verification requires an explicit complete positive profile; omitted execution_purpose defaults to REPRODUCE for legacy requests.
 
 Known DemoShop taps invoke the shared UI controllers through an allow-listed debug bridge, without coordinate taps. Unknown targets and unsupported assertion kinds return UNSUPPORTED. REAL_NETWORK is explicitly unsupported; DETERMINISTIC_DEMO reports DEMOSHOP_DEMO_HOOK and never toggles radios. Preconditions remain manual.
 '''

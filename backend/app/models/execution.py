@@ -2,6 +2,7 @@ from enum import Enum
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
 from typing import Literal
+from app.models.scenario import ExecutionPurpose
 
 class ExecutionStatus(str, Enum):
     PENDING = "PENDING"
@@ -37,6 +38,8 @@ class ExecutionResult(BaseModel):
     device_serial: str = "mock-device"
     status: ExecutionStatus
     execution_mode: Literal["MOCK", "ADB"] = "MOCK"
+    execution_purpose: ExecutionPurpose = ExecutionPurpose.REPRODUCE
+    product_outcome: Literal["UNCONFIRMED", "BUG_REPRODUCED", "FIX_VERIFIED", "VERIFICATION_FAILED"] = "UNCONFIRMED"
     started_at: str
     finished_at: str = ""
     duration_ms: float = 0.0

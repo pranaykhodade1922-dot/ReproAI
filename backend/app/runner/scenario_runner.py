@@ -11,6 +11,7 @@ from app.adb.client import AdbClient
 from app.adb.demo_bridge import DemoShopBridge
 from app.runner.demo_assertions import DemoShopAssertionProvider
 from app.config import settings
+from app.runner.execution_outcome import execution_outcome
 
 logger = logging.getLogger("ReproRunner.ScenarioRunner")
 
@@ -40,6 +41,7 @@ class ScenarioRunner:
                 except Exception:
                     stamp=datetime.now(timezone.utc).isoformat()
                     return ExecutionResult(execution_id=execution_id,scenario_id=scenario.id,scenario_name=scenario.name,
+                        execution_purpose=scenario.execution_purpose,
                         device_serial=device_serial,execution_mode='ADB',status=ExecutionStatus.FAILED,
                         started_at=stamp,finished_at=stamp,failure_reason='Device rotation is unsupported or unavailable.',
                         steps=[ExecutionStepResult(index=0,action='ROTATE_DEVICE',status=StepStatus.UNSUPPORTED,
@@ -62,6 +64,7 @@ class ScenarioRunner:
         is_mock: bool = True,
         on_step_update: Optional[Callable[[ExecutionStepResult], Awaitable[None]]] = None
     ) -> ExecutionResult:
+        assertions = scenario.execution_assertions()
         started_at = datetime.now(timezone.utc).isoformat()
         start_time = time.time()
 
@@ -82,6 +85,7 @@ class ScenarioRunner:
                 setup_evidence["action"] = "RESET_DEMO"
             except Exception as exc:
                 return ExecutionResult(execution_id=execution_id, scenario_id=scenario.id, scenario_name=scenario.name,
+                    execution_purpose=scenario.execution_purpose,
                     device_serial=device_serial, execution_mode="ADB", status=ExecutionStatus.ERROR,
                     started_at=started_at, finished_at=datetime.now(timezone.utc).isoformat(),
                     failure_reason="REAL_NETWORK is unsupported; no fallback performed." if settings.NETWORK_STRATEGY == "REAL_NETWORK"
@@ -131,7 +135,7 @@ class ScenarioRunner:
                 failure_reason = f"Step {idx + 1} ({step.action.value}) failed: {msg}"
 
         # Execute Assertions
-        for idx, assertion in enumerate(scenario.assertions):
+        for idx, assertion in enumerate(assertions):
             step_idx = len(scenario.steps) + idx
             step_start_str = datetime.now(timezone.utc).isoformat()
             step_start_time = time.time()
@@ -192,6 +196,8 @@ class ScenarioRunner:
         total_duration_ms = (end_time - start_time) * 1000.0
 
         return ExecutionResult(
+            execution_purpose=scenario.execution_purpose,
+            product_outcome=execution_outcome(scenario, overall_status, observed_state, execution_id, is_mock),
             execution_id=execution_id,
             scenario_id=scenario.id,
             scenario_name=scenario.name,

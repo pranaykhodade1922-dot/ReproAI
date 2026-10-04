@@ -47,6 +47,7 @@ class PaymentNetworkFailureRule : IncidentAnalysisRule {
                     TestActionItem(TestAction.TAP, target = "PAY", description = "Invoke the Checkout payment action"),
                     TestActionItem(TestAction.WAIT, value = "2500", description = "Wait for payment retry execution")
                 ),
+                verificationAssertions = VerificationProfile.payment,
                 assertions = listOf(
                     TestAssertion(type = "ASSERT_API_STATUS", target = "/payment", expected = "401"),
                     TestAssertion(type = "ASSERT_EVENT", target = "TOKEN_EXPIRED", expected = "True"),

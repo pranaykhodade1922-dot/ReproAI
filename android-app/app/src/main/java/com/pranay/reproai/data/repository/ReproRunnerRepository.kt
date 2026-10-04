@@ -100,11 +100,12 @@ class ReproRunnerRepository(context: Context) {
         }
         mutable.update { it.copy(purpose = purpose, result = null, phase = ExecutionPhase.Connecting, message = null) }
         try {
-            val readiness=requireNotNull(requestReadiness(scenario)) {state.value.message ?: "Repro Runner unavailable. Reconnect and retry."}
+            val request = com.pranay.reproai.ai.VerificationProfile.request(scenario, purpose)
+            val readiness=requireNotNull(requestReadiness(request)) {state.value.message ?: "Repro Runner unavailable. Reconnect and retry."}
             check(readiness.ready) {readiness.issues.joinToString("\n")}
             check(readiness.executionMode != ExecutionMode.MOCK || allowMock) {"Mock runner enabled. Confirm a mock run explicitly, or restart the runner in ADB mode."}
             mutable.update { it.copy(phase = ExecutionPhase.Submitting) }
-            val submitted = api.execute(scenario).validated(expectedScenarioId = scenario.id)
+            val submitted = api.execute(request).validated(expectedScenarioId = scenario.id)
             mutable.update { it.copy(result = submitted, phase = ExecutionPhase.Running) }
             return withTimeout(190_000) {
                 var result = submitted

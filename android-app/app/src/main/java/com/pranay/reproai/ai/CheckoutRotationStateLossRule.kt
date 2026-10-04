@@ -24,7 +24,7 @@ class CheckoutRotationStateLossRule : IncidentAnalysisRule {
             "Real Android configuration change loses transient checkout selection",
             listOf(TestPrecondition("ORIENTATION","PORTRAIT")),steps,
             listOf("ORIENTATION_CHANGED","CHECKOUT_RECREATED","CHECKOUT_STATE_LOST","CHECKOUT_INVALID","PAYMENT_BLOCKED")
-                .map {TestAssertion("ASSERT_EVENT",it,"True")})
+                .map {TestAssertion("ASSERT_EVENT",it,"True")}, verificationAssertions=VerificationProfile.rotation)
         return AnalysisResult("Checkout State Lost After Device Rotation",
             "The selected payment method disappeared after Android recreated Checkout.",
             "Device orientation changed during checkout.",

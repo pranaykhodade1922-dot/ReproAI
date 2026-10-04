@@ -48,10 +48,12 @@ class RotationBugTest {
                 add("checkout",JsonObject().apply {addProperty("orientationBefore",1);addProperty("orientationAfter",2)
                     addProperty("isValid",fixed);if(fixed)addProperty("selectedPaymentMethod","UPI") else add("selectedPaymentMethod",JsonNull.INSTANCE)})
             }
-            val execution=ExecutionResult("run",scenario.id,scenario.name,"device",if(fixed) ExecutionStatus.FAILED else ExecutionStatus.PASSED,
+            val execution=ExecutionResult("run",scenario.id,scenario.name,"device",ExecutionStatus.PASSED,
                 ExecutionMode.ADB,"2026-10-03T00:00:00Z","2026-10-03T00:00:01Z",1000.0,
                 scenario.steps.mapIndexed {i,s->ExecutionStepResult(i,s.action.name,s.target,StepStatus.PASSED,"","",1.0,"",JsonObject())},
-                0,0,null,"ANDROID_CONFIGURATION",observed)
+                if(fixed) VerificationProfile.rotation.size else scenario.assertions.size,0,null,"ANDROID_CONFIGURATION",observed,
+                execution_purpose=if(fixed) ExecutionPurpose.VERIFY_FIX else ExecutionPurpose.REPRODUCE,
+                product_outcome=if(fixed) ProductOutcome.FIX_VERIFIED else ProductOutcome.BUG_REPRODUCED)
             return RunnerState(phase=ExecutionPhase.Completed,purpose=if(fixed) ExecutionPurpose.VERIFY_FIX else ExecutionPurpose.REPRODUCE,result=execution)
         }
         assertEquals("BUG REPRODUCED",executionTitle(result(false),scenario))

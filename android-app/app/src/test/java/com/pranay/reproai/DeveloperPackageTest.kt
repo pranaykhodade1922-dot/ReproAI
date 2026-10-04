@@ -16,7 +16,8 @@ class DeveloperPackageTest {
     private val report=IncidentReportBuilder.build(DebugSession("fixture",issueTitle="Payment"),analysis,"report",1)
     @Test fun standaloneScenarioHasRunnerContractWithoutWrapper() {
         val json=JsonParser.parseString(DeveloperPackageExporter.scenarioJson(report)).asJsonObject
-        assertEquals(setOf("id","name","description","preconditions","steps","assertions"),json.keySet())
+        assertEquals(setOf("id","name","description","preconditions","steps","assertions","verification_assertions","execution_purpose"),json.keySet())
+        assertEquals("REPRODUCE",json.get("execution_purpose").asString)
         assertEquals("TAP",json.getAsJsonArray("steps")[0].asJsonObject.get("action").asString)
         assertFalse(json.has("report"))
     }

@@ -17,10 +17,12 @@ class ExecutionService:
         self._device_locks: Dict[str, asyncio.Lock] = {}
 
     async def execute_scenario(self, scenario: TestScenario) -> ExecutionResult:
+        assertions = scenario.execution_assertions()
         execution_id = f"exec-{uuid.uuid4().hex}"
         is_mock = settings.RUNNER_MODE == "mock"
         serial = "mock-device"
         result = ExecutionResult(execution_id=execution_id, scenario_id=scenario.id, scenario_name=scenario.name,
+            execution_purpose=scenario.execution_purpose,
             device_serial=serial, status=ExecutionStatus.PENDING, execution_mode="MOCK" if is_mock else "ADB",
             started_at=datetime.now(timezone.utc).isoformat())
         self._executions[execution_id] = result
@@ -30,7 +32,7 @@ class ExecutionService:
         result.steps.extend(ExecutionStepResult(index=len(scenario.steps) + i,
             action=assertion.type if assertion.type.startswith("ASSERT_") else f"ASSERT_{assertion.type}",
             target=assertion.target, status=StepStatus.PENDING, started_at="", finished_at="", duration_ms=0)
-            for i, assertion in enumerate(scenario.assertions))
+            for i, assertion in enumerate(assertions))
         if not is_mock:
             devices = await asyncio.to_thread(self.device_manager.get_connected_devices)
             devices = [d for d in devices if not settings.DEFAULT_DEVICE_SERIAL or d.serial == settings.DEFAULT_DEVICE_SERIAL]

@@ -61,6 +61,10 @@ async def list_devices():
 @router.post("/execute", response_model=ExecutionResult, status_code=status.HTTP_200_OK)
 async def execute_scenario(scenario: TestScenario):
     try:
+        scenario.execution_assertions()
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
+    try:
         return await execution_service.execute_scenario(scenario)
     except Exception as e:
         raise HTTPException(

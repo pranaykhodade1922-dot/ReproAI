@@ -23,6 +23,11 @@ class DemoPreflight:
         issues, warnings, checks = [], [], ["Runner"]
         mode = settings.RUNNER_MODE.upper()
         if scenario is not None:
+            try:
+                assertions = scenario.execution_assertions()
+            except ValueError as exc:
+                assertions = []
+                issues.append(str(exc))
             if not scenario.id.strip() or not scenario.name.strip() or not scenario.steps:
                 issues.append("Scenario must have an ID, name and at least one action. Analyze the incident again.")
             for step in scenario.steps:
@@ -46,7 +51,7 @@ class DemoPreflight:
                     elif action in ("ASSERT_VISIBLE", "ASSERT_TEXT"):
                         issues.append("Only measured DemoShop event/API assertions are supported.")
             if mode == "ADB":
-                for assertion in scenario.assertions:
+                for assertion in assertions:
                     if assertion.type not in ("ASSERT_API_STATUS", "ASSERT_EVENT"):
                         issues.append("Only measured DemoShop event/API assertions are supported.")
                     elif assertion.type == "ASSERT_API_STATUS" and (assertion.target != "/payment" or not assertion.expected.isdigit()):

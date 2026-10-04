@@ -19,6 +19,7 @@ data class RunnerReadiness(val ready: Boolean, val executionMode: ExecutionMode,
     }
 }
 enum class ExecutionPurpose { REPRODUCE, VERIFY_FIX }
+enum class ProductOutcome { UNCONFIRMED, BUG_REPRODUCED, FIX_VERIFIED, VERIFICATION_FAILED }
 enum class ExecutionStatus { PENDING, RUNNING, PASSED, FAILED, ERROR, CANCELLED }
 enum class StepStatus { PENDING, RUNNING, PASSED, FAILED, SKIPPED, UNSUPPORTED }
 enum class ExecutionMode { MOCK, ADB }
@@ -34,7 +35,9 @@ data class ExecutionResult(
     val steps: List<ExecutionStepResult>, val assertions_passed: Int,
     val assertions_failed: Int, val failure_reason: String?,
     val network_strategy: String? = null, val observed_state: JsonObject? = null,
-    val setup_evidence: JsonObject? = null
+    val setup_evidence: JsonObject? = null,
+    val execution_purpose: ExecutionPurpose? = null,
+    val product_outcome: ProductOutcome? = null
 ) {
     val terminal: Boolean get() = status !in listOf(ExecutionStatus.PENDING, ExecutionStatus.RUNNING)
     fun validated(expectedExecutionId: String? = null, expectedScenarioId: String? = null): ExecutionResult {

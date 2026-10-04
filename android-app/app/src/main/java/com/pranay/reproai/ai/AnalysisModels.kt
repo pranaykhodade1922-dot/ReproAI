@@ -53,7 +53,11 @@ data class TestScenario(
     val description: String,
     val preconditions: List<TestPrecondition> = emptyList(),
     val steps: List<TestActionItem> = emptyList(),
-    val assertions: List<TestAssertion> = emptyList()
+    val assertions: List<TestAssertion> = emptyList(),
+    @com.google.gson.annotations.SerializedName("verification_assertions")
+    val verificationAssertions: List<TestAssertion>? = emptyList(),
+    @com.google.gson.annotations.SerializedName("execution_purpose")
+    val executionPurpose: com.pranay.reproai.data.remote.dto.ExecutionPurpose = com.pranay.reproai.data.remote.dto.ExecutionPurpose.REPRODUCE
 )
 
 data class ReproductionStep(

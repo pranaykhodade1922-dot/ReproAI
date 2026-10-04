@@ -11,7 +11,7 @@ import org.junit.Test
 
 class IncidentReportTest {
     private val scenario = com.pranay.reproai.ai.TestScenario("payment","Payment failure","",steps=listOf(TestActionItem(TestAction.TAP,"PAY")),
-        assertions=listOf(TestAssertion("ASSERT_API_STATUS","/payment","401")))
+        assertions=listOf(TestAssertion("ASSERT_API_STATUS","/payment","401")), verificationAssertions=VerificationProfile.payment)
     private val analysis = AnalysisResult("Payment failure","Failure after network transition","Network transition",
         "Authentication token not refreshed",90,listOf("Auth"),listOf("e"),listOf("HTTP 401"),emptyList(),emptyList(),
         "Payment succeeds","Payment fails",scenario)
@@ -25,9 +25,11 @@ class IncidentReportTest {
             addProperty("lastApiStatus",if(fixed) 200 else 401);addProperty("paymentStatus",if(fixed) "SUCCESS" else "FAILED")
             add("events",JsonArray().apply {add(if(fixed) "TOKEN_REFRESHED" else "TOKEN_EXPIRED");add(if(fixed) "PAYMENT_SUCCESS" else "PAYMENT_FAILED")})
         }
-        return ExecutionResult(id,"payment","Payment failure","device",if(fixed) ExecutionStatus.FAILED else ExecutionStatus.PASSED,
+        return ExecutionResult(id,"payment","Payment failure","device",ExecutionStatus.PASSED,
             mode,"2026-10-02T00:00:00Z","2026-10-02T00:00:01Z",1000.0,listOf(ExecutionStepResult(0,"TAP","PAY",
-                StepStatus.PASSED,"","",1.0,"",JsonObject())),if(fixed) 0 else 1,if(fixed) 1 else 0,null,"DEMOSHOP_DEMO_HOOK",observed)
+                StepStatus.PASSED,"","",1.0,"",JsonObject())),if(fixed) 3 else 1,0,null,"DEMOSHOP_DEMO_HOOK",observed,
+                execution_purpose=if(fixed) ExecutionPurpose.VERIFY_FIX else ExecutionPurpose.REPRODUCE,
+                product_outcome=if(fixed) ProductOutcome.FIX_VERIFIED else ProductOutcome.BUG_REPRODUCED)
     }
     private fun report(a: AnalysisResult?=analysis,runs: List<Pair<ExecutionPurpose,ExecutionResult>> = emptyList()) =
         IncidentReportBuilder.build(session,a,"report-1",150,runs)
@@ -57,10 +59,10 @@ class IncidentReportTest {
         val r=report(runs=listOf(ExecutionPurpose.REPRODUCE to run()));assertEquals(ReportStatus.REPRODUCED,r.status)
         assertTrue(r.execution!!.observedSignature.contains("HTTP 401"))
     }
-    @Test fun verifiedReportPreservesOriginalAndFailedFailureAssertions() {
+    @Test fun verifiedReportPreservesOriginalAndPassedHealthyAssertions() {
         val r=report(runs=listOf(ExecutionPurpose.REPRODUCE to run(),ExecutionPurpose.VERIFY_FIX to run(true)))
         assertEquals(ReportStatus.FIX_VERIFIED,r.status);assertEquals(true,r.verification!!.sameScenario)
-        assertEquals(ExecutionStatus.FAILED,r.verification.execution.result.status)
+        assertEquals(ExecutionStatus.PASSED,r.verification.execution.result.status)
         assertTrue(r.verification.originalFailure.contains("TOKEN_EXPIRED"));assertTrue(r.verification.execution.observedSignature.contains("HTTP 200"))
     }
     @Test fun staleSignatureDoesNotUpgradeReport() {

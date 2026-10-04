@@ -50,8 +50,14 @@ fun executionTitle(state: RunnerState, scenario: TestScenario?): String {
         val controlStepsPassed = result.steps.take(controlCount).let {
             controlCount > 0 && it.size == controlCount && it.all { step -> step.status == StepStatus.PASSED }
         }
-        if (!verified || !controlStepsPassed || result.status !in listOf(ExecutionStatus.PASSED, ExecutionStatus.FAILED) ||
+        if (!verified || !controlStepsPassed || result.status != ExecutionStatus.PASSED || result.assertions_failed != 0 ||
             result.steps.any { it.status == StepStatus.UNSUPPORTED }) return@runCatching null
+        if (state.purpose == ExecutionPurpose.VERIFY_FIX &&
+            (result.execution_purpose != ExecutionPurpose.VERIFY_FIX ||
+                result.product_outcome != ProductOutcome.FIX_VERIFIED ||
+                com.pranay.reproai.ai.VerificationProfile.resolve(requireNotNull(scenario)).let {
+                    it.isEmpty() || result.assertions_passed != it.size
+                })) return@runCatching null
         val events = observed.getAsJsonArray("events").map { it.asString }.toSet()
         val status = observed.get("lastApiStatus")?.takeUnless {it.isJsonNull}?.asInt
         val rotation=scenario?.steps?.any {it.action == com.pranay.reproai.ai.TestAction.ROTATE_DEVICE} == true &&
@@ -84,6 +90,7 @@ fun executionTitle(state: RunnerState, scenario: TestScenario?): String {
         }
     }.getOrNull()
     if (measuredOutcome != null) return measuredOutcome
+    if (state.purpose == ExecutionPurpose.VERIFY_FIX) return "VERIFICATION FAILED"
     if (result.status != ExecutionStatus.PASSED) return "EXECUTION ${result.status}"
     return "EXECUTION PASSED: PRODUCT OUTCOME UNCONFIRMED"
 }
@@ -154,8 +161,8 @@ fun RunnerExecutionScreen(state: RunnerState, scenario: TestScenario?, onCancel:
                 if(active) LinearProgressIndicator(progress={it.steps.count {step -> step.status in listOf(StepStatus.PASSED,StepStatus.FAILED,StepStatus.UNSUPPORTED,StepStatus.SKIPPED)}.toFloat()/it.steps.size.coerceAtLeast(1)},
                     modifier=Modifier.fillMaxWidth().padding(top=12.dp).height(3.dp),color=PrimaryBlue,trackColor=DarkSurfaceVariant)
                 else {
-                    MetadataRow(if(fixed) "Original failure checks" else "Assertions","${it.assertions_passed} / ${it.assertions_passed+it.assertions_failed} matched",true)
-                    if(fixed) Text("The same scenario reached its expected healthy state. Original failure assertions correctly no longer match.",
+                    MetadataRow(if(state.purpose == ExecutionPurpose.VERIFY_FIX) "Healthy-state assertions" else "Assertions","${it.assertions_passed} / ${it.assertions_passed+it.assertions_failed} matched",true)
+                    if(fixed) Text("Same scenario passed with healthy-state evidence.",
                         style=MaterialTheme.typography.bodySmall,color=TextSecondary)
                     SectionLabel("Observed evidence")
                     val events = runCatching {it.observed_state?.getAsJsonArray("events")?.map {event -> event.asString}.orEmpty()}.getOrDefault(emptyList())
