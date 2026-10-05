@@ -6,6 +6,23 @@ ReproAI is an Android-first debugging tool that captures device and instrumented
 
 **Validated:** two independent failure classes on a physical Android phone · 62 backend tests passed · 40 Android unit tests passed · 35 phone UI instrumentation tests passed.
 
+### Physical iQOO Validation — PASS
+
+Validated on:
+- iQOO / vivo I2407 (iQOO Z9 series)
+- Android 16 / API 36
+- Bug 1: BUG REPRODUCED 3/3 → FIX VERIFIED 3/3
+- Bug 2: BUG REPRODUCED 5/5 → FIX VERIFIED 5/5
+- Same scenario identity and reproduction actions reused during fix verification
+
+**Key verified highlights:**
+- ✓ Physical iQOO hardware validation completed
+- ✓ Bug 1 reproduced and fix verified on iQOO
+- ✓ Bug 2 reproduced and fix verified on iQOO
+- ✓ Same-scenario verification confirmed
+- ✓ Positive healthy-state evidence required for FIX VERIFIED
+- ✓ Android 16 compatibility validated for both supported bug classes
+
 ### Live Demo
 
 [Prototype](https://repro-ai-mu.vercel.app/) · [Demo Video](https://youtube.com/shorts/72w0FL3EjJw?feature=share) · [Demo Release](https://github.com/pranaykhodade1922-dot/ReproAI/releases/tag/v1.0.0-demo)
@@ -64,6 +81,16 @@ Result: FIX VERIFIED
 
 `CHANGE_NETWORK` activates DemoShop’s controlled transition; it does not switch the phone’s radios.
 
+### Physical iQOO Validation — Bug 1
+
+- **Device:** vivo I2407 / iQOO Z9 series
+- **OS / API:** Android 16 / API 36 (Funtouch OS 15)
+- **Failure evidence:** `PAY_BUTTON_CLICKED`, `API Request POST /payment`, `PAYMENT_NETWORK_CHANGED`, `PAYMENT_RETRY`, `TOKEN_EXPIRED`, `API Response 401`, `PAYMENT_FAILED`
+- **BUG REPRODUCED:** 3/3 assertions passed
+- **Fix verification:** Same scenario identity (`scen_766dda23`) and reproduction actions reused
+- **Healthy evidence:** `TOKEN_REFRESHED`, `API Response 200`, `PAYMENT_SUCCESS`
+- **FIX VERIFIED:** 3/3 healthy assertions passed
+
 ## Validated Failure Classes
 
 | Failure class | Trigger | Failure evidence | Fix evidence |
@@ -72,6 +99,16 @@ Result: FIX VERIFIED
 | Rotation/state restoration | Actual portrait → landscape rotation with UPI selected in Checkout | `CHECKOUT_STATE_LOST`, `CHECKOUT_INVALID`, `PAYMENT_BLOCKED` | `CHECKOUT_STATE_RESTORED`, `CHECKOUT_VALID`, `PAYMENT_AVAILABLE`; UPI retained |
 
 Both buggy and fixed modes passed their real-device validation journeys. These two instrumented patterns validate multiple failure mechanisms; they do not imply support for every Android bug. [Measured evidence and validation matrix](docs/multi-bug-validation.md).
+
+### Physical iQOO Validation — Bug 2
+
+- **Device:** vivo I2407 / iQOO Z9 series
+- **OS / API:** Android 16 / API 36 (Funtouch OS 15)
+- **Failure evidence:** `PAYMENT_METHOD_SELECTED`, `DEVICE ORIENTATION_CHANGED`, `CHECKOUT_RECREATED`, `CHECKOUT_STATE_LOST`, `CHECKOUT_INVALID`, `PAYMENT_BLOCKED`
+- **BUG REPRODUCED:** 5/5 assertions passed
+- **Fix verification:** Same scenario identity and reproduction actions reused
+- **Healthy evidence:** `CHECKOUT_STATE_RESTORED`, `CHECKOUT_VALID`, `PAYMENT_AVAILABLE`
+- **FIX VERIFIED:** 5/5 assertions passed
 
 ## Screenshots
 
@@ -167,11 +204,11 @@ Build the `app` module; the older `android-app/src/` tree is retained history, n
 
 | Scope | Current behavior |
 | --- | --- |
-| Real device execution | Physical Android phone, ADB actions, display rotation and Activity recreation |
+| Real device execution | Physical iQOO and Android phones, ADB actions, display rotation and Activity recreation |
 | Real application pipeline | Event capture, runner communication, scoped assertions, Room persistence, reports and exports |
 | Deterministic demo behavior | DemoShop’s network/auth/payment state machine and deliberately buggy/fixed implementations; fixed checkout restores UPI from saved instance state |
 | Mock mode | Simulates execution for transport/UI checks; proves neither reproduction nor a fix |
-| Not implemented or validated | Physical Wi-Fi → cellular automation, production payment gateway validation, actual iQOO hardware validation |
+| Not implemented or validated | Physical Wi-Fi → cellular radio switching automation, production payment gateway validation, arbitrary 3rd-party app reproduction |
 
 ## Running ReproAI
 
@@ -256,20 +293,22 @@ These are development protections, not a complete production security model. The
 
 ## Validation
 
-| Check | Verified result |
+| Validation | Result |
 | --- | --- |
-| Backend pytest | **62 passed** |
-| Android unit tests | **40 passed** |
-| Phone UI instrumentation | **35 passed** |
-| Checkout layout tests | **6 passed** (tested across 360, 393, 430 dp viewports and 1.0x/1.3x font scales) |
-| Bug 1 reproduction | **BUG REPRODUCED** — 3/3 failure assertions passed |
-| Bug 1 fix verification | **FIX VERIFIED** — same scenario identity/actions, 3/3 healthy assertions passed (`TOKEN_REFRESHED`, HTTP 200, `PAYMENT_SUCCESS`) |
-| Bug 2 reproduction & verification | **Previously validated** — 5/5 failure assertions matched, 5/5 healthy assertions verified with unchanged scenario |
-| ReproAI / DemoShop debug APKs | **Both builds successful** |
-| Real-device journeys | **Both bug classes reproduced and fixes verified with unchanged scenarios** |
-| Persistence | Both reports survived restart; 13 local incidents preserved |
+| Backend tests | 62 passed |
+| Android unit tests | 40 passed |
+| Phone UI tests | 35 passed |
+| Checkout layout tests | 6 passed (tested across 360, 393, 430 dp viewports and 1.0x/1.3x font scales) |
+| iQOO Bug 1 reproduction | PASS — 3/3 (`TOKEN_EXPIRED`, HTTP 401, `PAYMENT_FAILED`) |
+| iQOO Bug 1 verification | PASS — 3/3 (`TOKEN_REFRESHED`, HTTP 200, `PAYMENT_SUCCESS`) |
+| iQOO Bug 2 reproduction | PASS — 5/5 (`ORIENTATION_CHANGED`, `CHECKOUT_RECREATED`, `CHECKOUT_STATE_LOST`, `CHECKOUT_INVALID`, `PAYMENT_BLOCKED`) |
+| iQOO Bug 2 verification | PASS — 5/5 (`CHECKOUT_STATE_RESTORED`, `CHECKOUT_VALID`, `PAYMENT_AVAILABLE`) |
+| iQOO device | vivo I2407 / Android 16 / API 36 (iQOO Z9 series) |
+| ReproAI / DemoShop debug APKs | Both builds successful |
+| Real-device journeys | Both bug classes reproduced and fixes verified with unchanged scenarios |
+| Persistence | Reports survived restart; local incident history preserved |
 
-Fresh Bug 1 validation on **OPPO CPH2577, Android 15**; historical validation on **OPPO CPH2477, Android 12** retained. Actual iQOO validation remains pending. [Detailed two-bug evidence](docs/multi-bug-validation.md).
+ReproAI has been physically validated across multiple Android devices, including OPPO devices and the final iQOO hardware validation device. Physical validation completed on **iQOO (vivo I2407, Android 16 / API 36, iQOO Z9 series)** for both Bug 1 and Bug 2. Historical physical validations on **OPPO CPH2577, Android 15** and **OPPO CPH2477, Android 12** are retained as earlier validation milestones. [Detailed two-bug evidence](docs/multi-bug-validation.md).
 
 ```powershell
 cd backend
@@ -280,11 +319,13 @@ cd ../android-app
 
 ## Known Limitations
 
-- Physical Wi-Fi/cellular switching is not automated; DemoShop supplies deterministic network failure hooks and a fake payment service.
-- Production payment systems, arbitrary-app reproduction and LLM inference are not integrated. Current validation covers two instrumented failure classes.
-- Rotation support depends on device controls; this OPPO requires window-manager rotation. Unsupported or unmeasured execution cannot verify a fix.
+- Both validated bug classes have been physically reproduced and fix-verified on iQOO hardware running Android 16.
+- Physical Wi-Fi ↔ cellular radio switching is not automated; DemoShop supplies deterministic network failure hooks and a fake payment service.
+- Current validated analysis uses deterministic local rules, not live LLM inference.
+- Production payment systems, arbitrary third-party application reproduction and live LLM inference are not integrated. Current validation covers two instrumented failure classes.
+- Rotation support depends on device controls; window-manager rotation locks/orientation are used. Unsupported or unmeasured execution cannot verify a fix.
 - Backend execution history is in memory; Android incident/report history persists. Wireless debugging may disconnect when the phone sleeps.
-- Actual iQOO hardware and compatible Office Kit transfer validation remain pending.
+- Compatible Office Kit transfer validation remains pending.
 
 ## Documentation
 
@@ -292,7 +333,9 @@ cd ../android-app
 
 ## Why ReproAI
 
-Crash logs describe a failure. ReproAI focuses on reconstructing the sequence around it and converting supported patterns into a reusable executable scenario. That same scenario becomes a regression check after the fix.
+Sentry tells you what happened. Maestro/Appium execute tests. ReproAI turns a captured field failure into an executable scenario and reruns that same scenario to verify the fix.
+
+Crash logs describe a failure. ReproAI focuses on reconstructing the sequence around it and converting supported patterns into a reusable executable scenario. That same scenario becomes a regression check after the fix. ReproAI has been physically validated end-to-end on iQOO hardware across two independent Android bug classes: payment/authentication retry failure and checkout state loss after rotation.
 
 ## Future Work
 
