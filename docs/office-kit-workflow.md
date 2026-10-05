@@ -42,4 +42,4 @@ From `backend/`:
 
 ## Validation boundary
 
-Current physical validation uses OPPO, which is not a substitute for iQOO/Office Kit validation. The final iQOO transfer, native File Manager visibility, desktop opening and pairing remain items in [the device checklist](iqoo-validation-checklist.md). A USB/ADB development transfer is a fallback, not evidence of Office Kit usage. Do not show vendor account credentials or unrelated personal files in the recording.
+Current physical validation uses iQOO, but Office Kit validation remains pending. The final iQOO transfer, native File Manager visibility, desktop opening and pairing remain items in [the device checklist](iqoo-validation-checklist.md). A USB/ADB development transfer is a fallback, not evidence of Office Kit usage. Do not show vendor account credentials or unrelated personal files in the recording.

@@ -34,7 +34,7 @@ https://github.com/pranaykhodade1922-dot/ReproAI/blob/main/backend/README.md
 - DemoShop payment/network behavior uses deterministic demo hooks
 - Physical Wi-Fi-to-cellular switching is not automated
 - Production payment systems are not integrated
-- Actual iQOO hardware validation remains pending
+- Both currently supported bug classes have been physically reproduced and fix-verified on iQOO hardware running Android 16 / API 36.
 ```
 
 ---

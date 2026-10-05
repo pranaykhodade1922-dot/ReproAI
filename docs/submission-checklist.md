@@ -16,7 +16,7 @@
 - [x] Nine clean screenshots present in `docs/screenshots/` and reviewed for private identifiers.
 - [ ] Recapture current Verify Fix assertion rows when the phone is online; the existing Phase 8 screenshot is retained and explicitly labelled historical.
 - [ ] Office Kit workflow demonstrated on supported iQOO and recorded; workflow-level integration labelled honestly.
-- [ ] Actual iQOO validation checklist completed; OPPO checks are not presented as iQOO checks.
+- [x] Actual iQOO validation checklist completed; OPPO checks are not presented as iQOO checks.
 - [x] Developer ZIP/report JSON/Markdown and standalone scenario validated on laptop; Text export covered by exporter/provider tests.
 - [x] Sanitizer tests cover credentials, emails, phones and nested secret metadata.
 - [x] Tracked-file and APK scan found no credential, private-IP or personal-path candidates; `.env`, local SDK paths, APKs, keystores, databases and raw artifacts remain excluded from Git.
