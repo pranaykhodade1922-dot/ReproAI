@@ -326,108 +326,117 @@ fun CheckoutScreen() {
         modifier = Modifier
             .fillMaxSize()
             .padding(24.dp)
-            .verticalScroll(rememberScrollState())
     ) {
-        Text(
-            text = "FINAL STEP",
-            fontSize = 12.sp,
-            fontFamily = FontFamily.Monospace,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF38BDF8)
-        )
-        Text(
-            text = "Checkout & Payment",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.White
-        )
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(14.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E))
+        // Keep payment reachable while the checkout/developer controls scroll.
+        // MainActivity already applies safeDrawingPadding to the whole viewport.
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(text = "ORDER TOTAL", fontSize = 11.sp, fontFamily = FontFamily.Monospace, color = Color.Gray)
-                Text(text = "₹2,499", fontSize = 28.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, color = Color.White)
-                Spacer(modifier = Modifier.height(12.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(imageVector = Icons.Default.Lock, contentDescription = null, tint = Color(0xFF10B981), modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(text = "Secured via ReproAI Event Tracked Payment Engine", fontSize = 12.sp, color = Color.Gray)
+            Text(
+                text = "FINAL STEP",
+                fontSize = 12.sp,
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF38BDF8)
+            )
+            Text(
+                text = "Checkout & Payment",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(14.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E))
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(text = "ORDER TOTAL", fontSize = 11.sp, fontFamily = FontFamily.Monospace, color = Color.Gray)
+                    Text(text = "₹2,499", fontSize = 28.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, color = Color.White)
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(imageVector = Icons.Default.Lock, contentDescription = null, tint = Color(0xFF10B981), modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(text = "Secured via ReproAI Event Tracked Payment Engine", fontSize = 12.sp, color = Color.Gray)
+                    }
                 }
             }
-        }
 
-        Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-        if (BuildConfig.DEBUG) {
-            Text("Checkout rotation state: ${if(shop.preserveCheckoutRotation) "FIXED" else "BUGGY"}",color=Color.White)
-            Switch(checked=shop.preserveCheckoutRotation,onCheckedChange=ShopController::fixedRotation,
-                modifier=Modifier.testTag("checkout_rotation_fixed_toggle"))
-            Text(if(shop.useFixedAuth) "FIXED MODE" else "BUGGY MODE", color = Color(0xFFEF4444))
-            Text("DEMO_HOOK / fake payment service", color = Color.Gray)
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Authentication retry behavior: ${if(shop.useFixedAuth) "FIXED" else "BUGGY"}", color = Color.White, modifier = Modifier.weight(1f))
-                Switch(checked = shop.useFixedAuth, onCheckedChange = { ShopController.fixedAuth(it) },
-                    enabled = !isProcessing, modifier = Modifier.testTag("checkout_fixed_auth_toggle"))
+            if (BuildConfig.DEBUG) {
+                Text("Checkout rotation state: ${if(shop.preserveCheckoutRotation) "FIXED" else "BUGGY"}",color=Color.White)
+                Switch(checked=shop.preserveCheckoutRotation,onCheckedChange=ShopController::fixedRotation,
+                    modifier=Modifier.testTag("checkout_rotation_fixed_toggle"))
+                Text(if(shop.useFixedAuth) "FIXED MODE" else "BUGGY MODE", color = Color(0xFFEF4444))
+                Text("DEMO_HOOK / fake payment service", color = Color.Gray)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Authentication retry behavior: ${if(shop.useFixedAuth) "FIXED" else "BUGGY"}", color = Color.White, modifier = Modifier.weight(1f))
+                    Switch(checked = shop.useFixedAuth, onCheckedChange = { ShopController.fixedAuth(it) },
+                        enabled = !isProcessing, modifier = Modifier.testTag("checkout_fixed_auth_toggle"))
+                }
+                OutlinedButton(onClick={ShopController.resetPresentation()},enabled=!isProcessing) {Text("RESET DEMO")}
             }
-            OutlinedButton(onClick={ShopController.resetPresentation()},enabled=!isProcessing) {Text("RESET DEMO")}
-        }
-        Text("Payment method: ${shop.selectedPaymentMethod ?: "Not selected"}",color=Color.White,
-            modifier=Modifier.testTag("checkout_payment_selected"))
-        Row {
-            OutlinedButton(onClick={ShopController.selectPaymentMethod("UPI")},modifier=Modifier.testTag("checkout_payment_upi")) {Text("UPI")}
-            OutlinedButton(onClick={ShopController.selectPaymentMethod("CARD")},modifier=Modifier.testTag("checkout_payment_card")) {Text("Card")}
-        }
-        if(shop.checkoutStateLost) Text("Checkout invalid: payment method lost after rotation. Select a method to continue.",
-            color=Color(0xFFEF4444),modifier=Modifier.testTag("checkout_invalid_state"))
-        // Demo Controls Card
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(14.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFF2A1B2A)),
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFEF4444).copy(alpha = 0.5f))
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = "DEMO CONTROLS",
-                    fontSize = 11.sp,
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFFEF4444)
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Simulate network transition during payment",
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color.White
-                        )
-                        Text(
-                            text = "Simulates Wi-Fi → Cellular token expiry bug",
-                            fontSize = 11.sp,
-                            color = Color.Gray
+            Text("Payment method: ${shop.selectedPaymentMethod ?: "Not selected"}",color=Color.White,
+                modifier=Modifier.testTag("checkout_payment_selected"))
+            Row {
+                OutlinedButton(onClick={ShopController.selectPaymentMethod("UPI")},modifier=Modifier.testTag("checkout_payment_upi")) {Text("UPI")}
+                OutlinedButton(onClick={ShopController.selectPaymentMethod("CARD")},modifier=Modifier.testTag("checkout_payment_card")) {Text("Card")}
+            }
+            if(shop.checkoutStateLost) Text("Checkout invalid: payment method lost after rotation. Select a method to continue.",
+                color=Color(0xFFEF4444),modifier=Modifier.testTag("checkout_invalid_state"))
+            // Demo Controls Card
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(14.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF2A1B2A)),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFEF4444).copy(alpha = 0.5f))
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "DEMO CONTROLS",
+                        fontSize = 11.sp,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFEF4444)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Simulate network transition during payment",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color.White
+                            )
+                            Text(
+                                text = "Simulates Wi-Fi → Cellular token expiry bug",
+                                fontSize = 11.sp,
+                                color = Color.Gray
+                            )
+                        }
+                        Switch(
+                            modifier = Modifier.testTag("checkout_demo_network_toggle").semantics { contentDescription = "checkout_demo_network_toggle" },
+                            checked = isSimulatedTransitionEnabled,
+                            onCheckedChange = { ShopController.transition(it) }
                         )
                     }
-                    Switch(
-                        modifier = Modifier.testTag("checkout_demo_network_toggle").semantics { contentDescription = "checkout_demo_network_toggle" },
-                        checked = isSimulatedTransitionEnabled,
-                        onCheckedChange = { ShopController.transition(it) }
-                    )
                 }
             }
+
         }
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(16.dp))
 
         Button(
             onClick = { ShopController.pay() },

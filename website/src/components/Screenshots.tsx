@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 interface ScreenshotItem {
   id: string;
@@ -24,15 +24,15 @@ const primaryScreenshots: ScreenshotItem[] = [
     subtitle: 'Scenario Runner · Mode ADB',
     tag: 'Failure Assertion Passed',
     src: '/screenshots/07-bug-reproduced.png',
-    description: 'Autonomous runner commands the physical device over ADB, triggering network toggles and asserting the exact payment failure signature.',
+    description: 'The runner drives the physical device over ADB, activates DemoShop’s deterministic network-transition hook, and asserts the payment failure signature. Physical radios remain unchanged.',
   },
   {
     id: '08-fix-verified',
     title: 'Fix Verified',
-    subtitle: 'Unchanged Scenario Rerun',
+    subtitle: 'Phase 8 Capture',
     tag: 'Positive Health Verification',
     src: '/screenshots/08-fix-verified.png',
-    description: 'Re-executes the identical TestScenario against the fixed app. Verifies token refresh, HTTP 200, and successful checkout completion.',
+    description: 'Historical Phase 8 capture showing token refresh, HTTP 200, and payment success. Its original failure-check rows predate the current typed healthy-state profile; current Verify Fix reuses the same scenario identity and actions with healthy assertions.',
   },
 ];
 
@@ -89,15 +89,22 @@ const secondaryScreenshots: ScreenshotItem[] = [
 
 export const Screenshots: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState<ScreenshotItem | null>(null);
+  const closeButton = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (selectedImage) {
       const originalOverflow = document.body.style.overflow;
+      const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
       document.body.style.overflow = 'hidden';
+      closeButton.current?.focus();
 
       const handleKeyDown = (e: KeyboardEvent) => {
         if (e.key === 'Escape') {
           setSelectedImage(null);
+        }
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          closeButton.current?.focus();
         }
       };
 
@@ -106,6 +113,7 @@ export const Screenshots: React.FC = () => {
       return () => {
         document.body.style.overflow = originalOverflow;
         window.removeEventListener('keydown', handleKeyDown);
+        previousFocus?.focus();
       };
     }
   }, [selectedImage]);
@@ -150,7 +158,16 @@ export const Screenshots: React.FC = () => {
               {/* Phone Frame Wrapper (Realistic phone aspect ratio, no browser chrome) */}
               <div
                 className="relative bg-[#05070a] p-3 flex items-center justify-center cursor-pointer"
+                role="button"
+                tabIndex={0}
+                aria-label={`Inspect ${item.title} screenshot`}
                 onClick={() => setSelectedImage(item)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setSelectedImage(item);
+                  }
+                }}
               >
                 <div className="relative rounded-2xl overflow-hidden border-2 border-[#1f283d] bg-black shadow-inner max-w-[280px] w-full">
                   <img
@@ -191,7 +208,16 @@ export const Screenshots: React.FC = () => {
           {secondaryScreenshots.map((item) => (
             <div
               key={item.id}
+              role="button"
+              tabIndex={0}
+              aria-label={`Inspect ${item.title} screenshot`}
               onClick={() => setSelectedImage(item)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setSelectedImage(item);
+                }
+              }}
               className="flex flex-col rounded-xl bg-[#0c1017] border border-[#1b2333] hover:border-sky-500/50 transition-all overflow-hidden cursor-pointer group"
             >
               <div className="p-2.5 bg-[#090d14] border-b border-[#182030]">
@@ -241,6 +267,7 @@ export const Screenshots: React.FC = () => {
                   </div>
                   <button
                     type="button"
+                    ref={closeButton}
                     onClick={() => setSelectedImage(null)}
                     className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
                     aria-label="Close screenshot"

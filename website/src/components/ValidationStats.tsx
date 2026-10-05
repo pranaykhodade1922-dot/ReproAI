@@ -2,9 +2,9 @@ import React from 'react';
 
 export const ValidationStats: React.FC = () => {
   const stats = [
-    { value: '51', label: 'Backend tests', sub: 'pytest suite' },
-    { value: '31', label: 'Android unit tests', sub: 'JUnit 4 / Robolectric' },
-    { value: '33', label: 'Phone UI tests', sub: 'On-device instrumentation' },
+    { value: '62', label: 'Backend tests', sub: 'pytest suite' },
+    { value: '40', label: 'Android unit tests', sub: 'JUnit 4 / Robolectric' },
+    { value: '35', label: 'Phone UI tests', sub: 'On-device instrumentation' },
     { value: '2', label: 'Independent failure classes', sub: 'Network & Rotation' },
   ];
 
@@ -18,7 +18,7 @@ export const ValidationStats: React.FC = () => {
             Validation Metrics
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
-            115 automated and on-device tests.
+            137 automated and on-device tests.
           </h2>
           <p className="mt-3 text-slate-400 text-sm sm:text-base">
             Empirically measured test counts verifying contract compliance, safety boundaries, and end-to-end device execution.

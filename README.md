@@ -4,7 +4,11 @@
 
 ReproAI is an Android-first debugging tool that captures device and instrumented application events, reconstructs a failure sequence, and generates a typed, machine-executable `TestScenario`. A laptop-side runner executes it through ADB; after a fix, the same scenario is rerun and both outcomes become a developer report.
 
-**Validated:** two independent failure classes on a physical Android phone · 51 backend tests · 31 Android unit tests · 33 phone UI tests.
+**Validated:** two independent failure classes on a physical Android phone · 62 backend tests passed · 40 Android unit tests passed · 35 phone UI instrumentation tests passed.
+
+### Live Demo
+
+[Prototype](https://repro-ai-mu.vercel.app/) · [Demo Video](https://youtube.com/shorts/72w0FL3EjJw?feature=share) · [Demo Release](https://github.com/pranaykhodade1922-dot/ReproAI/releases/tag/v1.0.0-demo)
 
 **Capture → Diagnose → Reproduce → Verify → Report**
 
@@ -27,7 +31,9 @@ Developers need an actionable sequence and a way to check whether their fix actu
 
 ReproAI correlates selected debugging events with the tester’s description, identifies a supported failure pattern, and produces reproduction steps plus a typed scenario. Repro Runner executes those steps on the phone and checks execution-scoped evidence.
 
-**Reproduction and verification reuse the same scenario.** A fix requires positive healthy-state evidence, not merely the absence of the original failure. Observed events are shown separately from the analyzer’s inferred diagnosis; analysis currently uses local rules, not LLM inference.
+**Reproduction and verification reuse the same scenario identity and the same reproduction actions.** Reproduction evaluates failure assertions, while Verify Fix switches to a typed healthy-state assertion profile. A fix is reported as `FIX VERIFIED` only when positive healthy evidence is observed, not merely because the original failure disappeared.
+
+Observed events remain separate from the analyzer’s inferred diagnosis; the validated prototype currently uses deterministic local analysis rules, not LLM inference.
 
 ## Demo Example: Payment Retry
 
@@ -40,12 +46,19 @@ PAY tapped → network transition → retry → TOKEN_EXPIRED → HTTP 401 → P
 The generated scenario arms the transition before PAY:
 
 ```text
-OPEN_SCREEN Checkout → CHANGE_NETWORK CELLULAR → TAP PAY → WAIT 2500 ms
-Assert: /payment = 401, TOKEN_EXPIRED, PAYMENT_FAILED
+REPRODUCE
+Actions:
+OPEN_SCREEN Checkout
+CHANGE_NETWORK CELLULAR
+TAP PAY
+WAIT 2500 ms
+
+Failure assertions: TOKEN_EXPIRED, HTTP 401, PAYMENT_FAILED
 Result: BUG REPRODUCED
 
-Enable fixed authentication; rerun the unchanged scenario.
-Observe: TOKEN_REFRESHED → HTTP 200 → PAYMENT_SUCCESS
+VERIFY FIX
+Enable fixed authentication; reuse the same scenario identity and reproduction actions.
+Typed healthy-state assertions: TOKEN_REFRESHED, HTTP 200, PAYMENT_SUCCESS
 Result: FIX VERIFIED
 ```
 
@@ -63,6 +76,8 @@ Both buggy and fixed modes passed their real-device validation journeys. These t
 ## Screenshots
 
 Actual phone captures of the payment demo. Images link to full-size versions.
+
+These historical Phase 8 captures predate the current typed healthy-state assertion profile. The latest [Verify Fix validation](docs/verify-fix-validation.md) records 3/3 healthy assertion matches for Bug 1; the older screenshot’s original failure checks are not the current healthy assertion results.
 
 <table>
   <tr>
@@ -90,7 +105,7 @@ Actual phone captures of the payment demo. Images link to full-size versions.
 2. **Analyze:** Combine the description with captured evidence. Local analysis rules identify supported patterns and present a likely cause.
 3. **Generate TestScenario:** Produce typed actions, preconditions and assertions that the developer can inspect.
 4. **Execute:** Send the scenario to FastAPI; ADB drives DemoShop and WebSocket updates show progress. Unsupported actions cannot count as proof.
-5. **Verify & Report:** Rerun the scenario against the fixed implementation. Preserve failure and healthy-state evidence in reports and sanitized exports.
+5. **Verify & Report:** After the app is fixed, rerun the same scenario identity and reproduction actions using the healthy verification profile. Require positive healthy-state evidence, then preserve both the original reproduction and fix-verification results in reports and sanitized exports.
 
 ## Architecture
 
@@ -225,7 +240,7 @@ Start from [backend/.env.example](backend/.env.example); preserve your existing 
 
 **Start session → trigger DemoShop failure → Capture issue → Analyze → generated reproduction → Run → BUG REPRODUCED → enable fix → Verify Fix → FIX VERIFIED → report/export.**
 
-Allow 3–5 minutes for the primary payment demo. Before starting, use **Configure → Developer demo → Check readiness → Reset demo**; capture promptly after failure. Reset clears temporary demo state and both fix switches while preserving incident history. [Presenter script and recovery steps](docs/demo-script.md).
+The full live/manual demo flow typically takes 3–5 minutes. A shortened walkthrough video is linked above. Before starting, use **Configure → Developer demo → Check readiness → Reset demo**; capture promptly after failure. Reset clears temporary demo state and both fix switches while preserving incident history. [Presenter script and recovery steps](docs/demo-script.md).
 
 ## Developer Reports
 
@@ -243,14 +258,18 @@ These are development protections, not a complete production security model. The
 
 | Check | Verified result |
 | --- | --- |
-| Backend pytest | **51 passed** |
-| Android unit tests | **31 passed** |
-| Phone UI instrumentation | **33 passed** |
+| Backend pytest | **62 passed** |
+| Android unit tests | **40 passed** |
+| Phone UI instrumentation | **35 passed** |
+| Checkout layout tests | **6 passed** (tested across 360, 393, 430 dp viewports and 1.0x/1.3x font scales) |
+| Bug 1 reproduction | **BUG REPRODUCED** — 3/3 failure assertions passed |
+| Bug 1 fix verification | **FIX VERIFIED** — same scenario identity/actions, 3/3 healthy assertions passed (`TOKEN_REFRESHED`, HTTP 200, `PAYMENT_SUCCESS`) |
+| Bug 2 reproduction & verification | **Previously validated** — 5/5 failure assertions matched, 5/5 healthy assertions verified with unchanged scenario |
 | ReproAI / DemoShop debug APKs | **Both builds successful** |
 | Real-device journeys | **Both bug classes reproduced and fixes verified with unchanged scenarios** |
 | Persistence | Both reports survived restart; 13 local incidents preserved |
 
-Validated on **OPPO CPH2477, Android 12**. Actual iQOO validation remains pending. [Detailed two-bug evidence](docs/multi-bug-validation.md).
+Fresh Bug 1 validation on **OPPO CPH2577, Android 15**; historical validation on **OPPO CPH2477, Android 12** retained. Actual iQOO validation remains pending. [Detailed two-bug evidence](docs/multi-bug-validation.md).
 
 ```powershell
 cd backend
@@ -283,4 +302,4 @@ GitHub/Jira incident integration, broader SDK/target support, additional failure
 
 Built for the **iQOO Developer Tools challenge**.
 
-Demo video — Coming soon · Submission — Coming soon
+[Live prototype, demo video and demo release](#live-demo).

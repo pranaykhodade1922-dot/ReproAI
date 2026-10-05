@@ -32,7 +32,7 @@ fun ActiveSessionScreen(timerSeconds: Int, eventsCount: Int, currentScreen: Stri
                 Box {
                     IconButton(onClick={menu=true}) {Icon(Icons.Default.MoreVert, "Session actions")}
                     DropdownMenu(expanded=menu,onDismissRequest={menu=false}) {
-                        DropdownMenuItem(text={Text("Export session JSON")},onClick={menu=false;onExportJson()})
+                        DropdownMenuItem(text={Text("Copy session JSON")},onClick={menu=false;onExportJson()})
                         DropdownMenuItem(text={Text("Simulate demo events")},onClick={menu=false;onSimulatePaymentBug()})
                     }
                 }

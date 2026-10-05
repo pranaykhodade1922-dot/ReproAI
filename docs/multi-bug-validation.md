@@ -1,5 +1,7 @@
 # Two independent mobile failure classes
 
+Latest validation: [Verify Fix workflow validation](verify-fix-validation.md) records 62 backend tests, 40 Android unit tests and 35 physical phone UI tests, with typed healthy-state verification using the same scenario identity/actions. Fresh Bug 1 validation on OPPO CPH2577 (Android 15) passed with 3/3 failure assertions and 3/3 healthy assertions (`scen_46e1a67c`); Bug 2 results below remain previously validated. Historical counts and execution IDs below are retained as evidence from that run.
+
 ReproAI uses the same capture, analysis, typed scenario, ADB execution, report and same-scenario verification pipeline for two DemoShop failures. This validates these two instrumented patterns, not arbitrary Android bugs. Analysis is local rule based, including the normal `LocalAiProvider` path; no LLM inference is active.
 
 ## Architecture and changed files

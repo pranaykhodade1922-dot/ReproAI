@@ -33,8 +33,8 @@ export const HowItWorks: React.FC = () => {
     {
       number: '05',
       title: 'Verify',
-      desc: 'Rerun the exact same scenario after the fix and require positive healthy-state evidence.',
-      detail: 'Ensures healthy state assertions pass on identical test JSON',
+      desc: 'Reuse the same scenario identity and reproduction actions after the fix; require positive healthy-state evidence.',
+      detail: 'Switches from failure assertions to a typed healthy-state profile',
       tag: 'Verification',
     },
   ];
@@ -106,7 +106,7 @@ export const HowItWorks: React.FC = () => {
             The same scenario is used for reproduction and fix verification.
           </p>
           <p className="mt-1 text-xs sm:text-sm text-slate-400 max-w-2xl mx-auto">
-            ReproAI does not write a separate assertion suite for regression testing. The identical scenario that proved the defect is re-executed to prove the resolution.
+            Reproduction evaluates failure assertions. Verify Fix reuses the same scenario identity and actions with a typed healthy-state assertion profile; absence of the original failure alone is insufficient.
           </p>
         </div>
 

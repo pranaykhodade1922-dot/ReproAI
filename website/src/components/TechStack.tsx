@@ -29,8 +29,8 @@ export const TechStack: React.FC = () => {
     {
       category: 'Testing Suite',
       tag: 'Quality Gates',
-      techs: ['pytest (51 passed)', 'JUnit (31 passed)', 'Android UI instrumentation (33 passed)', 'Contract validation'],
-      desc: '115 total verified tests spanning unit, integration, mock-runner contracts, and on-device UI flows.',
+      techs: ['pytest (62 passed)', 'JUnit (40 passed)', 'Android UI instrumentation (35 passed)', 'Contract validation'],
+      desc: '137 total verified tests spanning unit, integration, mock-runner contracts, and on-device UI flows.',
     },
   ];
 

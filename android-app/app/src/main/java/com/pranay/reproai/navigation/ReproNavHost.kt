@@ -157,7 +157,13 @@ fun ReproNavHost(
                 onExportJson = {
                     val json = viewModel.exportCurrentSessionJson()
                     if (json != null) {
-                        Toast.makeText(context, "Session exported as JSON (${json.length} chars)", Toast.LENGTH_LONG).show()
+                        try {
+                            val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                            clipboard.setPrimaryClip(android.content.ClipData.newPlainText("ReproAI session JSON", json))
+                            Toast.makeText(context, "Sanitized session JSON copied", Toast.LENGTH_LONG).show()
+                        } catch (_: Exception) {
+                            Toast.makeText(context, "Session JSON could not be copied. Try again.", Toast.LENGTH_LONG).show()
+                        }
                     } else {
                         Toast.makeText(context, "No active session to export", Toast.LENGTH_SHORT).show()
                     }

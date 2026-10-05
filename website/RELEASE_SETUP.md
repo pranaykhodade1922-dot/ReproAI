@@ -2,13 +2,13 @@
 
 This document outlines the procedure for publishing release assets to GitHub Releases for hackathon judges and evaluators. 
 
-> **Important**: This release is planned and has not yet been published. Do not commit `.apk` binaries into normal Git history.
+> **Important**: [Demo release `v1.0.0-demo`](https://github.com/pranaykhodade1922-dot/ReproAI/releases/tag/v1.0.0-demo) is published. Its ReproAI APK predates the latest typed Verify Fix validation; do not treat it as the current validated build. Release updates require a separate review. Do not commit `.apk` binaries into normal Git history.
 
 ---
 
 ## 1. Suggested Release Metadata
 
-- **Suggested Release Tag**: `v1.0-demo` (or `v1.0`)
+- **Published Release Tag**: `v1.0.0-demo`
 - **Suggested Release Title**: `ReproAI Hackathon Demo v1.0`
 
 ### Suggested Release Description

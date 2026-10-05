@@ -30,12 +30,7 @@ fun DescribeBugScreen(descriptionText: String, isAnalyzing: Boolean, isListening
             SectionLabel("Describe what happened")
             OutlinedTextField(descriptionText,onDescriptionChanged,modifier=Modifier.fillMaxWidth(),minLines=5,
                 placeholder={Text(com.pranay.reproai.ai.CaptureDescription.placeholder)},
-                trailingIcon={IconButton(onClick=onVoiceToggle,enabled=!isAnalyzing) {
-                    Icon(if(isListeningVoice) Icons.Default.MicOff else Icons.Default.Mic,
-                        if(isListeningVoice) "Stop voice recording" else "Dictate issue description")
-                }},enabled=!isAnalyzing)
-            if(isListeningVoice) Text("Listening...",color=PrimaryBlue,style=MaterialTheme.typography.bodySmall,
-                modifier=Modifier.padding(top=8.dp))
+                enabled=!isAnalyzing)
         }
     }
 }
