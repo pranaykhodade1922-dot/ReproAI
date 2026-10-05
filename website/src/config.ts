@@ -4,5 +4,5 @@ export const links = {
   releases: 'https://github.com/pranaykhodade1922-dot/ReproAI/releases',
   latestRelease: 'https://github.com/pranaykhodade1922-dot/ReproAI/releases/tag/v1.0.0-demo',
   setupGuide: 'https://github.com/pranaykhodade1922-dot/ReproAI/blob/main/backend/README.md',
-  demoVideo: null,
+  demoVideo: 'https://youtube.com/shorts/72w0FL3EjJw?feature=share',
 };

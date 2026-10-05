@@ -106,6 +106,18 @@ export const TryReproAI: React.FC = () => {
                 </svg>
                 <span>View Source</span>
               </a>
+              <a
+                href={links.demoVideo}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Watch ReproAI demo video on YouTube"
+                className="inline-flex items-center gap-2 px-5 py-3.5 rounded-xl text-sm font-medium text-slate-200 bg-[#121824] border border-[#233148] hover:bg-[#182132] hover:text-white hover:border-slate-500 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+              >
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="5 3 19 12 5 21 5 3" />
+                </svg>
+                <span>Watch Demo</span>
+              </a>
             </div>
 
             {/* Package Contents Breakdown */}
